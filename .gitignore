@@ -1,0 +1,3 @@
+# Generated PowerPoint binaries are not tracked because binary files are not
+# supported by the review/diff workflow. Generate or decode them locally.
+*.pptx

@@ -1,0 +1,443 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2036" height="8684" viewBox="0 0 2036 8684">
+<rect width="100%" height="100%" fill="#eef2f7"/>
+<g transform="translate(40,40)">
+<rect width="960" height="540" rx="18" fill="#f8fafc" stroke="#cbd5e1"/>
+<rect width="8" height="540" rx="4" fill="#2563eb"/>
+<text x="34" y="58" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="28" font-weight="700" fill="#0f172a">标题：Agentic RL 调研</text>
+<rect x="58" y="105" width="842" height="355" rx="18" fill="#ffffff" stroke="#e2e8f0"/>
+<text x="86" y="145" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• 主题：从 LLM 对齐到长期自主决策的 Reward、Credit</text>
+<text x="106" y="170" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">Assignment 与方法图谱</text>
+<text x="86" y="205" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• 核心问题：Agent 为什么需要 RL？Agentic RL 与传统</text>
+<text x="106" y="230" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">RL / LLM RL 的区别在哪里？</text>
+<text x="86" y="265" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• 重点：reward 机制、长程信用分配、规划 / 工具 / 记忆 /</text>
+<text x="106" y="290" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">推理模块如何被 RL 化</text>
+<text x="34" y="506" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="14" fill="#64748b">Agentic RL 中文调研报告 · 01</text>
+</g>
+<g transform="translate(1036,40)">
+<rect width="960" height="540" rx="18" fill="#f8fafc" stroke="#cbd5e1"/>
+<rect width="8" height="540" rx="4" fill="#2563eb"/>
+<text x="34" y="58" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="28" font-weight="700" fill="#0f172a">Executive Summary：一句话结论</text>
+<rect x="58" y="105" width="842" height="355" rx="18" fill="#ffffff" stroke="#e2e8f0"/>
+<text x="86" y="145" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• Agentic RL 的核心不是让 LLM 多调用工具，而是训练 LLM</text>
+<text x="106" y="170" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">agent 在动态环境中做长期、多步、可反馈的决策。</text>
+<text x="86" y="205" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• 与普通 LLM RL 相比，Agentic RL 优化对象从</text>
+<text x="106" y="230" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">response 变成 trajectory。</text>
+<text x="86" y="265" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• 当前最大瓶颈是 reward 与 credit</text>
+<text x="106" y="290" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">assignment：知道一条轨迹成功，不等于知道哪一步应该被强化。</text>
+<text x="86" y="325" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• 主流研究正在从 outcome reward 走向</text>
+<text x="106" y="350" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">verifier-guided process</text>
+<text x="34" y="506" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="14" fill="#64748b">Agentic RL 中文调研报告 · 02</text>
+</g>
+<g transform="translate(40,616)">
+<rect width="960" height="540" rx="18" fill="#f8fafc" stroke="#cbd5e1"/>
+<rect width="8" height="540" rx="4" fill="#2563eb"/>
+<text x="34" y="58" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="28" font-weight="700" fill="#0f172a">从传统 RL 到 Agentic RL：为什么不是简单换个模型？</text>
+<rect x="58" y="105" width="842" height="355" rx="18" fill="#ffffff" stroke="#e2e8f0"/>
+<text x="86" y="145" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• 传统 RL：在相对明确的状态、动作、奖励定义下学习控制策略。</text>
+<text x="86" y="180" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• LLM RL：主要优化 prompt → response</text>
+<text x="106" y="205" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">的输出质量，常见 reward 来自偏好、规则或可验证答案。</text>
+<text x="86" y="240" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• Agentic</text>
+<text x="106" y="265" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">RL：优化多轮环境交互轨迹，动作包含规划、工具调用、搜索、代码执行、记忆</text>
+<text x="86" y="300" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• 范式变化：从 single-step / short-horizon</text>
+<text x="106" y="325" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">text optimization 走向 long-horizon</text>
+<text x="34" y="506" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="14" fill="#64748b">Agentic RL 中文调研报告 · 03</text>
+</g>
+<g transform="translate(1036,616)">
+<rect width="960" height="540" rx="18" fill="#f8fafc" stroke="#cbd5e1"/>
+<rect width="8" height="540" rx="4" fill="#2563eb"/>
+<text x="34" y="58" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="28" font-weight="700" fill="#0f172a">三种范式核心对比</text>
+<rect x="58" y="105" width="842" height="355" rx="18" fill="#ffffff" stroke="#e2e8f0"/>
+<text x="86" y="145" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• 传统 RL 的 action 通常是环境动作；LLM RL 的</text>
+<text x="106" y="170" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">action 常被视为 token 或完整回答；Agentic RL 的</text>
+<text x="86" y="205" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• 传统 RL 的 reward 多来自环境；LLM RL 多来自偏好模型或</text>
+<text x="106" y="230" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">verifier；Agentic RL</text>
+<text x="86" y="265" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• Agentic RL 的 state 包含</text>
+<text x="106" y="290" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">observation、历史上下文、memory、tool</text>
+<text x="86" y="325" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• Agentic RL 的难点不是有没有 RL</text>
+<text x="106" y="350" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">算法，而是如何定义可训练、可归因、可泛化的 agent 交互信号。</text>
+<text x="34" y="506" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="14" fill="#64748b">Agentic RL 中文调研报告 · 04</text>
+</g>
+<g transform="translate(40,1192)">
+<rect width="960" height="540" rx="18" fill="#f8fafc" stroke="#cbd5e1"/>
+<rect width="8" height="540" rx="4" fill="#2563eb"/>
+<text x="34" y="58" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="28" font-weight="700" fill="#0f172a">为什么 Agent 需要 RL？</text>
+<rect x="58" y="105" width="842" height="355" rx="18" fill="#ffffff" stroke="#e2e8f0"/>
+<text x="86" y="145" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• Agent 的任务天然是 sequential decision</text>
+<text x="106" y="170" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">making：每一步都会改变后续可观测状态与可行动空间。</text>
+<text x="86" y="205" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• 工具调用需要学习成本收益权衡：何时不用工具、何时调用、调哪个、参数怎么写</text>
+<text x="106" y="230" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">、失败后如何恢复。</text>
+<text x="86" y="265" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• 记忆模块需要学习策略：何时写、写什么、何时读、何时删除或修正。</text>
+<text x="86" y="300" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• 规划模块需要适应反馈：计划不是一次生成后固定执行，而是要根据环境结果持续</text>
+<text x="106" y="325" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">修正。</text>
+<text x="86" y="360" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• 只靠 SFT</text>
+<text x="106" y="385" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">容易模仿成功轨迹表象，难以从失败、探索和环境反馈中持续改进。</text>
+<text x="34" y="506" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="14" fill="#64748b">Agentic RL 中文调研报告 · 05</text>
+</g>
+<g transform="translate(1036,1192)">
+<rect width="960" height="540" rx="18" fill="#f8fafc" stroke="#cbd5e1"/>
+<rect width="8" height="540" rx="4" fill="#2563eb"/>
+<text x="34" y="58" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="28" font-weight="700" fill="#0f172a">Agentic RL 的基本建模</text>
+<rect x="58" y="105" width="842" height="355" rx="18" fill="#ffffff" stroke="#e2e8f0"/>
+<text x="86" y="145" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• Observation：网页状态、工具返回、代码执行结果、数据库查询、用</text>
+<text x="106" y="170" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">户反馈、其他 agent 消息。</text>
+<text x="86" y="205" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• Internal State /</text>
+<text x="106" y="230" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">Belief：历史上下文、working</text>
+<text x="86" y="265" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• Action：自然语言回复、工具调用、API 参数、代码</text>
+<text x="106" y="290" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">patch、搜索 query、memory 写入、子任务分配。</text>
+<text x="86" y="325" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• Reward：最终成功、子目标完成、过程质量、工具成本、时间成本、安全约</text>
+<text x="106" y="350" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">束、用户满意度。</text>
+<text x="86" y="385" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• Policy：不仅是 base LLM，也包括 planner、tool</text>
+<text x="106" y="410" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">router、memory</text>
+<text x="34" y="506" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="14" fill="#64748b">Agentic RL 中文调研报告 · 06</text>
+</g>
+<g transform="translate(40,1768)">
+<rect width="960" height="540" rx="18" fill="#f8fafc" stroke="#cbd5e1"/>
+<rect width="8" height="540" rx="4" fill="#2563eb"/>
+<text x="34" y="58" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="28" font-weight="700" fill="#0f172a">哪些传统 / LLM RL 方法可以保留？</text>
+<rect x="58" y="105" width="842" height="355" rx="18" fill="#ffffff" stroke="#e2e8f0"/>
+<text x="86" y="145" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• Policy</text>
+<text x="106" y="170" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">optimization：PPO、REINFORCE、GRPO、RLOO</text>
+<text x="86" y="205" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• Reward shaping：final reward 太稀疏，必须补充</text>
+<text x="106" y="230" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">step reward、turn reward、process</text>
+<text x="86" y="265" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• Hierarchical RL：Agent 天然分层，适合用</text>
+<text x="106" y="290" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">subgoal、option、skill、planner-executo</text>
+<text x="86" y="325" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• Offline / imitation：专家轨迹、人类操作日志、成功</text>
+<text x="106" y="350" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">agent traces 可用于 warm start 或偏好数据。</text>
+<text x="86" y="385" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• Critic / value</text>
+<text x="106" y="410" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">model：可以尝试估计每一步状态或动作的长期价值，缓解高方差。</text>
+<text x="34" y="506" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="14" fill="#64748b">Agentic RL 中文调研报告 · 07</text>
+</g>
+<g transform="translate(1036,1768)">
+<rect width="960" height="540" rx="18" fill="#f8fafc" stroke="#cbd5e1"/>
+<rect width="8" height="540" rx="4" fill="#2563eb"/>
+<text x="34" y="58" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="28" font-weight="700" fill="#0f172a">哪些地方会出问题？</text>
+<rect x="58" y="105" width="842" height="355" rx="18" fill="#ffffff" stroke="#e2e8f0"/>
+<text x="86" y="145" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• State 不干净：环境、长上下文、记忆、工具输出、隐式计划混合在一起。</text>
+<text x="86" y="180" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• Action 空间巨大：一个 action</text>
+<text x="106" y="205" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">可能是一段代码、一次网页操作、一次 API 调用或一次 memory</text>
+<text x="86" y="240" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• Reward 稀疏且延迟：几十步之后才知道任务成败。</text>
+<text x="86" y="275" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• Credit assignment</text>
+<text x="106" y="300" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">极难：成功轨迹里可能有无效步骤，失败轨迹里也可能有关键探索。</text>
+<text x="86" y="335" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• 环境非平稳：网页、API、用户反馈和外部工具都可能变化，复现与离线训练困</text>
+<text x="106" y="360" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">难。</text>
+<text x="34" y="506" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="14" fill="#64748b">Agentic RL 中文调研报告 · 08</text>
+</g>
+<g transform="translate(40,2344)">
+<rect width="960" height="540" rx="18" fill="#f8fafc" stroke="#cbd5e1"/>
+<rect width="8" height="540" rx="4" fill="#2563eb"/>
+<text x="34" y="58" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="28" font-weight="700" fill="#0f172a">报告核心：Reward 与 Credit Assignment</text>
+<rect x="58" y="105" width="842" height="355" rx="18" fill="#ffffff" stroke="#e2e8f0"/>
+<text x="86" y="145" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• Agentic RL 的 reward 困境：我们优化的是整条</text>
+<text x="106" y="170" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">trajectory，但真正需要学习的是每一步 action 的选择。</text>
+<text x="86" y="205" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• Trajectory 好，不代表每一步都好；trajectory</text>
+<text x="106" y="230" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">坏，也不代表每一步都坏。</text>
+<text x="86" y="265" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• 关键问题：如何把最终成功或失败分配给 planning、tool</text>
+<text x="106" y="290" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">use、memory、reasoning、reflection</text>
+<text x="86" y="325" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• 当前没有通用解，主流方法只能从不同角度缓解稀疏 reward</text>
+<text x="106" y="350" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">与长程信用分配。</text>
+<text x="34" y="506" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="14" fill="#64748b">Agentic RL 中文调研报告 · 09</text>
+</g>
+<g transform="translate(1036,2344)">
+<rect width="960" height="540" rx="18" fill="#f8fafc" stroke="#cbd5e1"/>
+<rect width="8" height="540" rx="4" fill="#2563eb"/>
+<text x="34" y="58" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="28" font-weight="700" fill="#0f172a">Reward 层次一：Outcome / Trajectory Reward</text>
+<rect x="58" y="105" width="842" height="355" rx="18" fill="#ffffff" stroke="#e2e8f0"/>
+<text x="86" y="145" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• 定义：只根据整条轨迹最终结果给奖励，例如成功 +1、失败 0 或 -1。</text>
+<text x="86" y="180" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• 优点：客观、简单、易规模化，适合代码测试、数学答案、网页目标状态、游戏胜</text>
+<text x="106" y="205" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">负等可验证任务。</text>
+<text x="86" y="240" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• 缺点：奖励稀疏、高方差、不能定位步骤贡献，也容易导致 benchmark</text>
+<text x="106" y="265" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">overfitting 或 verifier hacking。</text>
+<text x="86" y="300" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• 结论：trajectory-level reward 是 Agentic</text>
+<text x="106" y="325" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">RL 的起点，但不是终点。</text>
+<text x="34" y="506" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="14" fill="#64748b">Agentic RL 中文调研报告 · 10</text>
+</g>
+<g transform="translate(40,2920)">
+<rect width="960" height="540" rx="18" fill="#f8fafc" stroke="#cbd5e1"/>
+<rect width="8" height="540" rx="4" fill="#2563eb"/>
+<text x="34" y="58" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="28" font-weight="700" fill="#0f172a">Reward 层次二：Process / Step / Turn Reward</text>
+<rect x="58" y="105" width="842" height="355" rx="18" fill="#ffffff" stroke="#e2e8f0"/>
+<text x="86" y="145" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• 定义：对中间推理、计划、工具调用、搜索 query、memory</text>
+<text x="106" y="170" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">操作或每一轮 turn 给局部奖励。</text>
+<text x="86" y="205" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• 优点：比 outcome reward</text>
+<text x="106" y="230" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">更密集，有助于长任务训练和失败定位。</text>
+<text x="86" y="265" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• 风险：可能奖励“看起来合理”的过程，而不是真正有效的行为；也可能诱导冗长</text>
+<text x="106" y="290" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">reasoning 或形式主义计划。</text>
+<text x="86" y="325" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• 关键要求：过程奖励最好与外部验证、状态变化或可执行检查绑定，而不是只看语</text>
+<text x="106" y="350" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">言表面。</text>
+<text x="34" y="506" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="14" fill="#64748b">Agentic RL 中文调研报告 · 11</text>
+</g>
+<g transform="translate(1036,2920)">
+<rect width="960" height="540" rx="18" fill="#f8fafc" stroke="#cbd5e1"/>
+<rect width="8" height="540" rx="4" fill="#2563eb"/>
+<text x="34" y="58" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="28" font-weight="700" fill="#0f172a">Verifier-based Reward：目前最可靠的来源之一</text>
+<rect x="58" y="105" width="842" height="355" rx="18" fill="#ffffff" stroke="#e2e8f0"/>
+<text x="86" y="145" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• Verifier 用外部环境或规则判断结果：单元测试、数学校验、SQL</text>
+<text x="106" y="170" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">执行、网页状态、工具返回、游戏环境。</text>
+<text x="86" y="205" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• 优点：比纯偏好模型更客观，适合规模化采样与自动评估。</text>
+<text x="86" y="240" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• 局限：只适用于可验证任务，且 verifier 可能覆盖不全、被</text>
+<text x="106" y="265" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">hack，无法完全解释中间步骤贡献。</text>
+<text x="86" y="300" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• 趋势：从只验证最终答案，发展到验证中间状态、局部子目标和工具调用结果。</text>
+<text x="34" y="506" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="14" fill="#64748b">Agentic RL 中文调研报告 · 12</text>
+</g>
+<g transform="translate(40,3496)">
+<rect width="960" height="540" rx="18" fill="#f8fafc" stroke="#cbd5e1"/>
+<rect width="8" height="540" rx="4" fill="#2563eb"/>
+<text x="34" y="58" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="28" font-weight="700" fill="#0f172a">Critic / Value Model：从“整条轨迹”到“每一步价值”</text>
+<rect x="58" y="105" width="842" height="355" rx="18" fill="#ffffff" stroke="#e2e8f0"/>
+<text x="86" y="145" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• 思路：训练 V(s_t) 或 Q(s_t, a_t)</text>
+<text x="106" y="170" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">估计从当前状态或动作继续执行的长期成功概率。</text>
+<text x="86" y="205" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• 好处：理论上可以做 step-level credit</text>
+<text x="106" y="230" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">assignment，降低 policy gradient 方差。</text>
+<text x="86" y="265" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• 难点：Agentic state</text>
+<text x="106" y="290" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">包含长上下文、工具状态、记忆与隐式计划，critic</text>
+<text x="86" y="325" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• 实践问题：critic 可能 hallucinate</text>
+<text x="106" y="350" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">value，也可能对未见环境泛化差。</text>
+<text x="34" y="506" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="14" fill="#64748b">Agentic RL 中文调研报告 · 13</text>
+</g>
+<g transform="translate(1036,3496)">
+<rect width="960" height="540" rx="18" fill="#f8fafc" stroke="#cbd5e1"/>
+<rect width="8" height="540" rx="4" fill="#2563eb"/>
+<text x="34" y="58" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="28" font-weight="700" fill="#0f172a">Counterfactual / Leave-one-out：更接近因果归因</text>
+<rect x="58" y="105" width="842" height="355" rx="18" fill="#ffffff" stroke="#e2e8f0"/>
+<text x="86" y="145" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• 核心问题：如果去掉或替换某一步，最终结果是否变化？</text>
+<text x="86" y="180" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• 例子：原轨迹成功；去掉某次工具调用后失败，则该工具调用可能是关键贡献步骤</text>
+<text x="106" y="205" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">。</text>
+<text x="86" y="240" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• 优点：比表面 process reward 更接近因果 credit</text>
+<text x="106" y="265" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">assignment。</text>
+<text x="86" y="300" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• 缺点：需要多次</text>
+<text x="106" y="325" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">rollout，成本高；开放环境可能不可复现；长轨迹组合爆炸。</text>
+<text x="86" y="360" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• 适用：高价值任务、离线分析、诊断 reward model、训练</text>
+<text x="106" y="385" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">critic 的辅助信号。</text>
+<text x="34" y="506" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="14" fill="#64748b">Agentic RL 中文调研报告 · 14</text>
+</g>
+<g transform="translate(40,4072)">
+<rect width="960" height="540" rx="18" fill="#f8fafc" stroke="#cbd5e1"/>
+<rect width="8" height="540" rx="4" fill="#2563eb"/>
+<text x="34" y="58" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="28" font-weight="700" fill="#0f172a">Hierarchical Reward：把长期任务拆成子目标</text>
+<rect x="58" y="105" width="842" height="355" rx="18" fill="#ffffff" stroke="#e2e8f0"/>
+<text x="86" y="145" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• 思路：把长任务拆成 planner-level 子目标和</text>
+<text x="106" y="170" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">executor-level 行动，每个子目标有局部 reward。</text>
+<text x="86" y="205" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• 优点：降低长程信用分配难度，符合 Agent 的自然结构。</text>
+<text x="86" y="240" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• 例子：修复 bug</text>
+<text x="106" y="265" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">可拆成定位文件、理解失败测试、修改代码、运行验证、提交 patch。</text>
+<text x="86" y="300" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• 难点：子目标如何自动生成？局部 reward</text>
+<text x="106" y="325" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">与最终目标是否一致？错误分解会不会误导训练？</text>
+<text x="34" y="506" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="14" fill="#64748b">Agentic RL 中文调研报告 · 15</text>
+</g>
+<g transform="translate(1036,4072)">
+<rect width="960" height="540" rx="18" fill="#f8fafc" stroke="#cbd5e1"/>
+<rect width="8" height="540" rx="4" fill="#2563eb"/>
+<text x="34" y="58" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="28" font-weight="700" fill="#0f172a">Reward 机制小结：没有银弹，但有组合拳</text>
+<rect x="58" y="105" width="842" height="355" rx="18" fill="#ffffff" stroke="#e2e8f0"/>
+<text x="86" y="145" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• Outcome reward 负责判断“最后是否成功”。</text>
+<text x="86" y="180" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• Process / turn reward 负责提供更密集的训练信号。</text>
+<text x="86" y="215" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• Verifier reward 负责把奖励绑定到外部事实或可执行检查。</text>
+<text x="86" y="250" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• Critic / value model 负责估计中间状态价值。</text>
+<text x="86" y="285" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• Counterfactual 负责更接近因果的归因诊断。</text>
+<text x="86" y="320" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• Hierarchical reward 负责降低长任务跨度，把</text>
+<text x="106" y="345" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">credit assignment 分散到子目标层。</text>
+<text x="34" y="506" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="14" fill="#64748b">Agentic RL 中文调研报告 · 16</text>
+</g>
+<g transform="translate(40,4648)">
+<rect width="960" height="540" rx="18" fill="#f8fafc" stroke="#cbd5e1"/>
+<rect width="8" height="540" rx="4" fill="#2563eb"/>
+<text x="34" y="58" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="28" font-weight="700" fill="#0f172a">主流方法图谱：按 Agent 模块组织</text>
+<rect x="58" y="105" width="842" height="355" rx="18" fill="#ffffff" stroke="#e2e8f0"/>
+<text x="86" y="145" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• 本报告不按算法名堆论文，而按 Agent</text>
+<text x="106" y="170" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">模块组织：planning、tool</text>
+<text x="86" y="205" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• 每个模块都问四个问题：action 是什么？reward</text>
+<text x="106" y="230" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">怎么给？credit assignment 难在哪里？现有方法如何缓解？</text>
+<text x="86" y="265" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• 这种组织方式更贴近 Agentic RL 的本质：训练整个 agent</text>
+<text x="106" y="290" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">system，而不只是训练 base model。</text>
+<text x="34" y="506" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="14" fill="#64748b">Agentic RL 中文调研报告 · 17</text>
+</g>
+<g transform="translate(1036,4648)">
+<rect width="960" height="540" rx="18" fill="#f8fafc" stroke="#cbd5e1"/>
+<rect width="8" height="540" rx="4" fill="#2563eb"/>
+<text x="34" y="58" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="28" font-weight="700" fill="#0f172a">RL for Planning：从静态计划到自适应重规划</text>
+<rect x="58" y="105" width="842" height="355" rx="18" fill="#ffffff" stroke="#e2e8f0"/>
+<text x="86" y="145" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• Action：任务分解、子目标选择、计划粒度控制、何时重规划、何时停止。</text>
+<text x="86" y="180" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• Reward：子目标完成率、最终任务成功、计划执行成本、重规划后是否纠错</text>
+<text x="106" y="205" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">。</text>
+<text x="86" y="240" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• 难点：计划看起来合理不等于可执行；错误计划可能在后续被修正，贡献难归因。</text>
+<text x="86" y="275" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• 方法方向：ReAct 式 reasoning-action</text>
+<text x="106" y="300" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">interleaving、tree search +</text>
+<text x="34" y="506" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="14" fill="#64748b">Agentic RL 中文调研报告 · 18</text>
+</g>
+<g transform="translate(40,5224)">
+<rect width="960" height="540" rx="18" fill="#f8fafc" stroke="#cbd5e1"/>
+<rect width="8" height="540" rx="4" fill="#2563eb"/>
+<text x="34" y="58" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="28" font-weight="700" fill="#0f172a">RL for Tool Use：学会何时、如何、是否调用工具</text>
+<rect x="58" y="105" width="842" height="355" rx="18" fill="#ffffff" stroke="#e2e8f0"/>
+<text x="86" y="145" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• Action：选择工具、生成参数、解释工具输出、失败重试、终止工具调用。</text>
+<text x="86" y="180" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• Reward：最终成功、工具结果是否有效、调用成本、参数合法性、是否减少</text>
+<text x="106" y="205" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">hallucination。</text>
+<text x="86" y="240" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• 难点：工具失败可能是坏操作，也可能提供有价值信息；无效调用和必要探索难区</text>
+<text x="106" y="265" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">分。</text>
+<text x="86" y="300" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• 方法方向：Toolformer 式自监督工具学习、ReAct</text>
+<text x="106" y="325" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">式交互轨迹、function-call 统一接口、多工具环境 RL。</text>
+<text x="34" y="506" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="14" fill="#64748b">Agentic RL 中文调研报告 · 19</text>
+</g>
+<g transform="translate(1036,5224)">
+<rect width="960" height="540" rx="18" fill="#f8fafc" stroke="#cbd5e1"/>
+<rect width="8" height="540" rx="4" fill="#2563eb"/>
+<text x="34" y="58" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="28" font-weight="700" fill="#0f172a">RL for Memory：Agentic RL 最有特色的模块之一</text>
+<rect x="58" y="105" width="842" height="355" rx="18" fill="#ffffff" stroke="#e2e8f0"/>
+<text x="86" y="145" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• Action：写入 memory、检索 memory、压缩</text>
+<text x="106" y="170" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">memory、修改 memory、删除 memory、抽象为</text>
+<text x="86" y="205" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• Reward：当前任务成功、后续任务复用收益、检索命中率、减少</text>
+<text x="106" y="230" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">token / tool cost、避免重复错误。</text>
+<text x="86" y="265" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• 难点：memory 的收益常常延迟出现；错误 memory</text>
+<text x="106" y="290" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">会污染未来轨迹；单条 memory 对最终结果的贡献很难归因。</text>
+<text x="86" y="325" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• 方法方向：Reflexion 的 verbal</text>
+<text x="106" y="350" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">memory、Voyager 的 skill</text>
+<text x="34" y="506" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="14" fill="#64748b">Agentic RL 中文调研报告 · 20</text>
+</g>
+<g transform="translate(40,5800)">
+<rect width="960" height="540" rx="18" fill="#f8fafc" stroke="#cbd5e1"/>
+<rect width="8" height="540" rx="4" fill="#2563eb"/>
+<text x="34" y="58" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="28" font-weight="700" fill="#0f172a">Memory 的 credit assignment 为什么特别难？</text>
+<rect x="58" y="105" width="842" height="355" rx="18" fill="#ffffff" stroke="#e2e8f0"/>
+<text x="86" y="145" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• 一次 memory</text>
+<text x="106" y="170" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">写入可能当前任务无用，但未来任务有用；也可能当前看起来有用，长期造成污染</text>
+<text x="86" y="205" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• 检索到的 memory 可能只是辅助，也可能是关键证据；很难从</text>
+<text x="106" y="230" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">final reward 直接判断。</text>
+<text x="86" y="265" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• 错误 memory 会被反复检索，形成自我强化的错误经验。</text>
+<text x="86" y="300" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• 需要同时优化 write policy、retrieval</text>
+<text x="106" y="325" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">policy、compression policy、deletion</text>
+<text x="34" y="506" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="14" fill="#64748b">Agentic RL 中文调研报告 · 21</text>
+</g>
+<g transform="translate(1036,5800)">
+<rect width="960" height="540" rx="18" fill="#f8fafc" stroke="#cbd5e1"/>
+<rect width="8" height="540" rx="4" fill="#2563eb"/>
+<text x="34" y="58" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="28" font-weight="700" fill="#0f172a">RL for Reasoning：从“会想”到“想得有用”</text>
+<rect x="58" y="105" width="842" height="355" rx="18" fill="#ffffff" stroke="#e2e8f0"/>
+<text x="86" y="145" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• Action：生成 reasoning trace、选择思考深度、调用</text>
+<text x="106" y="170" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">verifier、反思错误、决定何时停止思考并行动。</text>
+<text x="86" y="205" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• Reward：答案正确性、过程正确性、推理成本、是否产生可执行</text>
+<text x="106" y="230" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">action。</text>
+<text x="86" y="265" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• 难点：长 reasoning 不等于好决策；process reward</text>
+<text x="106" y="290" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">可能奖励漂亮话，而不是有效 reasoning。</text>
+<text x="86" y="325" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• 方法方向：outcome reward + process</text>
+<text x="106" y="350" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">reward、verifier-guided</text>
+<text x="34" y="506" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="14" fill="#64748b">Agentic RL 中文调研报告 · 22</text>
+</g>
+<g transform="translate(40,6376)">
+<rect width="960" height="540" rx="18" fill="#f8fafc" stroke="#cbd5e1"/>
+<rect width="8" height="540" rx="4" fill="#2563eb"/>
+<text x="34" y="58" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="28" font-weight="700" fill="#0f172a">RL for Self-improvement：从失败中形成经验</text>
+<rect x="58" y="105" width="842" height="355" rx="18" fill="#ffffff" stroke="#e2e8f0"/>
+<text x="86" y="145" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• Action：复盘失败、生成反思、更新策略、保存技能、设计下一次尝试。</text>
+<text x="86" y="180" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• Reward：重试成功率、同类任务迁移、减少重复错误、技能复用率。</text>
+<text x="86" y="215" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• 代表：Reflexion 使用语言反馈改善后续尝试；Voyager</text>
+<text x="106" y="240" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">通过技能库积累可复用能力。</text>
+<text x="86" y="275" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• 难点：反思可能</text>
+<text x="106" y="300" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">hallucinate；错误经验可能被固化；self-improveme</text>
+<text x="34" y="506" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="14" fill="#64748b">Agentic RL 中文调研报告 · 23</text>
+</g>
+<g transform="translate(1036,6376)">
+<rect width="960" height="540" rx="18" fill="#f8fafc" stroke="#cbd5e1"/>
+<rect width="8" height="540" rx="4" fill="#2563eb"/>
+<text x="34" y="58" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="28" font-weight="700" fill="#0f172a">RL for Multi-Agent：协作中的信用分配更复杂</text>
+<rect x="58" y="105" width="842" height="355" rx="18" fill="#ffffff" stroke="#e2e8f0"/>
+<text x="86" y="145" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• Action：角色分配、消息通信、任务交接、互评、冲突解决、集体决策。</text>
+<text x="86" y="180" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• Reward：团队成功、个体贡献、通信成本、角色完成度、安全约束。</text>
+<text x="86" y="215" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• 难点：共享 reward 下容易 free-riding；难判断哪个</text>
+<text x="106" y="240" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">agent 的哪条消息带来成功。</text>
+<text x="86" y="275" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• 方法方向：multi-agent credit</text>
+<text x="106" y="300" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">assignment、turn-level</text>
+<text x="34" y="506" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="14" fill="#64748b">Agentic RL 中文调研报告 · 24</text>
+</g>
+<g transform="translate(40,6952)">
+<rect width="960" height="540" rx="18" fill="#f8fafc" stroke="#cbd5e1"/>
+<rect width="8" height="540" rx="4" fill="#2563eb"/>
+<text x="34" y="58" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="28" font-weight="700" fill="#0f172a">代表性系统：RAGEN / StarPO</text>
+<rect x="58" y="105" width="842" height="355" rx="18" fill="#ffffff" stroke="#e2e8f0"/>
+<text x="86" y="145" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• RAGEN 研究 multi-turn agent RL 中的</text>
+<text x="106" y="170" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">self-evolution，并提出 StarPO 作为</text>
+<text x="86" y="205" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• 重要发现：多轮 agent RL 可能出现 Echo</text>
+<text x="106" y="230" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">Trap、reward variance cliffs 与</text>
+<text x="86" y="265" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• RAGEN 指出：如果没有细粒度、reasoning-aware</text>
+<text x="106" y="290" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">reward signals，agent 可能学到浅层策略或幻觉式</text>
+<text x="86" y="325" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• 启示：Agentic RL 不能只依赖最终</text>
+<text x="106" y="350" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">reward，需要稳定训练机制、轨迹过滤、critic 和更细粒度反馈。</text>
+<text x="34" y="506" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="14" fill="#64748b">Agentic RL 中文调研报告 · 25</text>
+</g>
+<g transform="translate(1036,6952)">
+<rect width="960" height="540" rx="18" fill="#f8fafc" stroke="#cbd5e1"/>
+<rect width="8" height="540" rx="4" fill="#2563eb"/>
+<text x="34" y="58" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="28" font-weight="700" fill="#0f172a">代表性系统：AgentGym-RL</text>
+<rect x="58" y="105" width="842" height="355" rx="18" fill="#ffffff" stroke="#e2e8f0"/>
+<text x="86" y="145" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• AgentGym-RL 面向 long-horizon</text>
+<text x="106" y="170" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">multi-turn decision</text>
+<text x="86" y="205" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• 系统包括 environment、agent、training</text>
+<text x="106" y="230" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">module，支持多场景、多算法和多轮交互。</text>
+<text x="86" y="265" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• 价值：把 Agentic RL 从单一任务实验推进到可复用训练基础设施。</text>
+<text x="86" y="300" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• 局限：框架解决基础设施问题，但 reward 设计、credit</text>
+<text x="106" y="325" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">assignment 与跨环境泛化仍是核心挑战。</text>
+<text x="34" y="506" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="14" fill="#64748b">Agentic RL 中文调研报告 · 26</text>
+</g>
+<g transform="translate(40,7528)">
+<rect width="960" height="540" rx="18" fill="#f8fafc" stroke="#cbd5e1"/>
+<rect width="8" height="540" rx="4" fill="#2563eb"/>
+<text x="34" y="58" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="28" font-weight="700" fill="#0f172a">代表性系统：AgentRL</text>
+<rect x="58" y="105" width="842" height="355" rx="18" fill="#ffffff" stroke="#e2e8f0"/>
+<text x="86" y="145" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• AgentRL 面向 scalable multi-turn,</text>
+<text x="106" y="170" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">multi-task agentic RL training。</text>
+<text x="86" y="205" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• 系统侧：异步 generation-training</text>
+<text x="106" y="230" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">pipeline、统一 function-call API、容器化环境与</text>
+<text x="86" y="265" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• 算法侧：cross-policy sampling</text>
+<text x="106" y="290" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">促进多轮探索，task advantage normalization</text>
+<text x="86" y="325" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• 启示：Agentic RL</text>
+<text x="106" y="350" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">的瓶颈不只是算法，也包括环境接口、采样效率、异步训练和多任务稳定性。</text>
+<text x="34" y="506" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="14" fill="#64748b">Agentic RL 中文调研报告 · 27</text>
+</g>
+<g transform="translate(1036,7528)">
+<rect width="960" height="540" rx="18" fill="#f8fafc" stroke="#cbd5e1"/>
+<rect width="8" height="540" rx="4" fill="#2563eb"/>
+<text x="34" y="58" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="28" font-weight="700" fill="#0f172a">当前方法的共同局限</text>
+<rect x="58" y="105" width="842" height="355" rx="18" fill="#ffffff" stroke="#e2e8f0"/>
+<text x="86" y="145" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• Reward 仍偏稀疏：很多任务只能验证最终结果，过程监督不足。</text>
+<text x="86" y="180" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• Credit assignment</text>
+<text x="106" y="205" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">没有通用解：critic、process</text>
+<text x="86" y="240" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• 泛化不足：在特定环境 / benchmark</text>
+<text x="106" y="265" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">学到的策略未必迁移到真实任务。</text>
+<text x="86" y="300" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• 成本高：多轮 rollout、工具调用、环境执行、反事实采样都很贵。</text>
+<text x="86" y="335" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• 安全风险更高：agent 可以调用工具和改变环境，reward</text>
+<text x="106" y="360" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">hacking 的后果比普通文本生成严重。</text>
+<text x="34" y="506" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="14" fill="#64748b">Agentic RL 中文调研报告 · 28</text>
+</g>
+<g transform="translate(40,8104)">
+<rect width="960" height="540" rx="18" fill="#f8fafc" stroke="#cbd5e1"/>
+<rect width="8" height="540" rx="4" fill="#2563eb"/>
+<text x="34" y="58" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="28" font-weight="700" fill="#0f172a">未来方向：以 Reward 和 Credit Assignment 为中心</text>
+<rect x="58" y="105" width="842" height="355" rx="18" fill="#ffffff" stroke="#e2e8f0"/>
+<text x="86" y="145" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• Verifier-grounded process</text>
+<text x="106" y="170" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">reward：把过程监督绑定到可执行检查，而不是语言表面。</text>
+<text x="86" y="205" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• Memory policy learning：系统学习 memory</text>
+<text x="106" y="230" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">的写、读、压缩、删除和冲突解决。</text>
+<text x="86" y="265" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• Hierarchical agent training：联合训练</text>
+<text x="106" y="290" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">planner、executor、tool router、memory</text>
+<text x="86" y="325" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• Counterfactual and causal credit</text>
+<text x="106" y="350" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">assignment：用反事实 rollout、hindsight</text>
+<text x="86" y="385" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• Safe agentic RL：把权限、成本、安全约束和审计轨迹纳入</text>
+<text x="106" y="410" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">reward 与训练环境。</text>
+<text x="34" y="506" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="14" fill="#64748b">Agentic RL 中文调研报告 · 29</text>
+</g>
+<g transform="translate(1036,8104)">
+<rect width="960" height="540" rx="18" fill="#f8fafc" stroke="#cbd5e1"/>
+<rect width="8" height="540" rx="4" fill="#2563eb"/>
+<text x="34" y="58" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="28" font-weight="700" fill="#0f172a">总结：Agentic RL 的核心命题</text>
+<rect x="58" y="105" width="842" height="355" rx="18" fill="#ffffff" stroke="#e2e8f0"/>
+<text x="86" y="145" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• Agentic RL 的研究对象是长期交互轨迹，而不是单轮回答。</text>
+<text x="86" y="180" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• 传统 RL 和 LLM RL 的方法可以迁移，但必须重构</text>
+<text x="106" y="205" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">state、action、reward 与 evaluation。</text>
+<text x="86" y="240" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• Reward 机制是当前最重要的瓶颈：trajectory-level</text>
+<text x="106" y="265" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">success 不足以提供 action-level learning</text>
+<text x="86" y="300" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• 主流方法正在围绕 planning、tool</text>
+<text x="106" y="325" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">use、memory、reasoning、self-improvemen</text>
+<text x="86" y="360" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">• 未来最关键的突破很可能来自可验证过程奖励、因果信用分配、模块化</text>
+<text x="106" y="385" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="18" fill="#0f172a">agent 训练和安全约束下的在线学习。</text>
+<text x="34" y="506" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="14" fill="#64748b">Agentic RL 中文调研报告 · 30</text>
+</g>
+</svg>

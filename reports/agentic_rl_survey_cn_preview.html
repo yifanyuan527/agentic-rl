@@ -1,0 +1,413 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Agentic RL 中文调研报告 PPT 预览</title>
+  <style>
+:root {
+  color-scheme: light;
+  --bg: #eef2f7;
+  --slide-bg: #f8fafc;
+  --card: #ffffff;
+  --text: #0f172a;
+  --muted: #64748b;
+  --border: #e2e8f0;
+  --accent: #2563eb;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
+}
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  padding: 18px 28px;
+  background: rgba(255,255,255,0.92);
+  border-bottom: 1px solid var(--border);
+  backdrop-filter: blur(10px);
+}
+.header h1 { margin: 0 0 6px; font-size: 24px; }
+.header p { margin: 0; color: var(--muted); font-size: 14px; }
+.deck {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(520px, 1fr));
+  gap: 28px;
+  padding: 28px;
+}
+.slide {
+  aspect-ratio: 16 / 9;
+  background: var(--slide-bg);
+  border: 1px solid #cbd5e1;
+  border-radius: 16px;
+  box-shadow: 0 18px 48px rgba(15, 23, 42, 0.14);
+  padding: 30px 34px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+.slide::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 8px;
+  height: 100%;
+  background: linear-gradient(180deg, #2563eb, #7c3aed, #059669);
+}
+.title {
+  margin: 0 0 18px 6px;
+  font-size: 28px;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+.body {
+  margin-left: 22px;
+  padding: 22px 26px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  flex: 1;
+}
+ul { margin: 0; padding-left: 22px; }
+li {
+  margin: 0 0 12px;
+  font-size: 17px;
+  line-height: 1.45;
+}
+.footer {
+  margin: 15px 0 0 6px;
+  color: var(--muted);
+  font-size: 13px;
+  display: flex;
+  justify-content: space-between;
+}
+@media (max-width: 640px) {
+  .deck { grid-template-columns: 1fr; padding: 14px; gap: 18px; }
+  .slide { padding: 22px; border-radius: 12px; }
+  .title { font-size: 20px; }
+  .body { margin-left: 10px; padding: 16px; }
+  li { font-size: 13px; margin-bottom: 8px; }
+}
+</style>
+</head>
+<body>
+  <header class="header">
+    <h1>Agentic RL 中文调研报告 PPT 预览</h1>
+    <p>这是 PPTX 的浏览器预览版：16:9 卡片、标题、正文卡片和页脚布局与生成的 PPTX 保持一致。</p>
+  </header>
+  <main class="deck">
+<section class="slide" id="slide-1">
+  <h2 class="title">标题：Agentic RL 调研</h2>
+  <div class="body"><ul><li>主题：从 LLM 对齐到长期自主决策的 Reward、Credit Assignment 与方法图谱</li>
+<li>核心问题：Agent 为什么需要 RL？Agentic RL 与传统 RL / LLM RL 的区别在哪里？</li>
+<li>重点：reward 机制、长程信用分配、规划 / 工具 / 记忆 / 推理模块如何被 RL 化</li></ul></div>
+  <div class="footer"><span>Agentic RL 中文调研报告</span><span>01 / 30</span></div>
+</section>
+
+
+<section class="slide" id="slide-2">
+  <h2 class="title">Executive Summary：一句话结论</h2>
+  <div class="body"><ul><li>Agentic RL 的核心不是让 LLM 多调用工具，而是训练 LLM agent 在动态环境中做长期、多步、可反馈的决策。</li>
+<li>与普通 LLM RL 相比，Agentic RL 优化对象从 response 变成 trajectory。</li>
+<li>当前最大瓶颈是 reward 与 credit assignment：知道一条轨迹成功，不等于知道哪一步应该被强化。</li>
+<li>主流研究正在从 outcome reward 走向 verifier-guided process reward、critic-assisted credit assignment、counterfactual attribution 与 hierarchical reward。</li></ul></div>
+  <div class="footer"><span>Agentic RL 中文调研报告</span><span>02 / 30</span></div>
+</section>
+
+
+<section class="slide" id="slide-3">
+  <h2 class="title">从传统 RL 到 Agentic RL：为什么不是简单换个模型？</h2>
+  <div class="body"><ul><li>传统 RL：在相对明确的状态、动作、奖励定义下学习控制策略。</li>
+<li>LLM RL：主要优化 prompt → response 的输出质量，常见 reward 来自偏好、规则或可验证答案。</li>
+<li>Agentic RL：优化多轮环境交互轨迹，动作包含规划、工具调用、搜索、代码执行、记忆读写、对话与协作。</li>
+<li>范式变化：从 single-step / short-horizon text optimization 走向 long-horizon interactive decision making。</li></ul></div>
+  <div class="footer"><span>Agentic RL 中文调研报告</span><span>03 / 30</span></div>
+</section>
+
+
+<section class="slide" id="slide-4">
+  <h2 class="title">三种范式核心对比</h2>
+  <div class="body"><ul><li>传统 RL 的 action 通常是环境动作；LLM RL 的 action 常被视为 token 或完整回答；Agentic RL 的 action 是复合行为。</li>
+<li>传统 RL 的 reward 多来自环境；LLM RL 多来自偏好模型或 verifier；Agentic RL 需要同时考虑任务成功、过程质量、成本和安全。</li>
+<li>Agentic RL 的 state 包含 observation、历史上下文、memory、tool results、plan 与隐含 belief，天然更接近 POMDP。</li>
+<li>Agentic RL 的难点不是有没有 RL 算法，而是如何定义可训练、可归因、可泛化的 agent 交互信号。</li></ul></div>
+  <div class="footer"><span>Agentic RL 中文调研报告</span><span>04 / 30</span></div>
+</section>
+
+
+<section class="slide" id="slide-5">
+  <h2 class="title">为什么 Agent 需要 RL？</h2>
+  <div class="body"><ul><li>Agent 的任务天然是 sequential decision making：每一步都会改变后续可观测状态与可行动空间。</li>
+<li>工具调用需要学习成本收益权衡：何时不用工具、何时调用、调哪个、参数怎么写、失败后如何恢复。</li>
+<li>记忆模块需要学习策略：何时写、写什么、何时读、何时删除或修正。</li>
+<li>规划模块需要适应反馈：计划不是一次生成后固定执行，而是要根据环境结果持续修正。</li>
+<li>只靠 SFT 容易模仿成功轨迹表象，难以从失败、探索和环境反馈中持续改进。</li></ul></div>
+  <div class="footer"><span>Agentic RL 中文调研报告</span><span>05 / 30</span></div>
+</section>
+
+
+<section class="slide" id="slide-6">
+  <h2 class="title">Agentic RL 的基本建模</h2>
+  <div class="body"><ul><li>Observation：网页状态、工具返回、代码执行结果、数据库查询、用户反馈、其他 agent 消息。</li>
+<li>Internal State / Belief：历史上下文、working memory、long-term memory、当前 plan、失败反思、检索内容。</li>
+<li>Action：自然语言回复、工具调用、API 参数、代码 patch、搜索 query、memory 写入、子任务分配。</li>
+<li>Reward：最终成功、子目标完成、过程质量、工具成本、时间成本、安全约束、用户满意度。</li>
+<li>Policy：不仅是 base LLM，也包括 planner、tool router、memory manager、verifier、reflection loop 等 scaffold。</li></ul></div>
+  <div class="footer"><span>Agentic RL 中文调研报告</span><span>06 / 30</span></div>
+</section>
+
+
+<section class="slide" id="slide-7">
+  <h2 class="title">哪些传统 / LLM RL 方法可以保留？</h2>
+  <div class="body"><ul><li>Policy optimization：PPO、REINFORCE、GRPO、RLOO 等可迁移到轨迹级优化。</li>
+<li>Reward shaping：final reward 太稀疏，必须补充 step reward、turn reward、process reward、cost penalty。</li>
+<li>Hierarchical RL：Agent 天然分层，适合用 subgoal、option、skill、planner-executor 结构描述。</li>
+<li>Offline / imitation：专家轨迹、人类操作日志、成功 agent traces 可用于 warm start 或偏好数据。</li>
+<li>Critic / value model：可以尝试估计每一步状态或动作的长期价值，缓解高方差。</li></ul></div>
+  <div class="footer"><span>Agentic RL 中文调研报告</span><span>07 / 30</span></div>
+</section>
+
+
+<section class="slide" id="slide-8">
+  <h2 class="title">哪些地方会出问题？</h2>
+  <div class="body"><ul><li>State 不干净：环境、长上下文、记忆、工具输出、隐式计划混合在一起。</li>
+<li>Action 空间巨大：一个 action 可能是一段代码、一次网页操作、一次 API 调用或一次 memory 写入。</li>
+<li>Reward 稀疏且延迟：几十步之后才知道任务成败。</li>
+<li>Credit assignment 极难：成功轨迹里可能有无效步骤，失败轨迹里也可能有关键探索。</li>
+<li>环境非平稳：网页、API、用户反馈和外部工具都可能变化，复现与离线训练困难。</li></ul></div>
+  <div class="footer"><span>Agentic RL 中文调研报告</span><span>08 / 30</span></div>
+</section>
+
+
+<section class="slide" id="slide-9">
+  <h2 class="title">报告核心：Reward 与 Credit Assignment</h2>
+  <div class="body"><ul><li>Agentic RL 的 reward 困境：我们优化的是整条 trajectory，但真正需要学习的是每一步 action 的选择。</li>
+<li>Trajectory 好，不代表每一步都好；trajectory 坏，也不代表每一步都坏。</li>
+<li>关键问题：如何把最终成功或失败分配给 planning、tool use、memory、reasoning、reflection 等不同模块？</li>
+<li>当前没有通用解，主流方法只能从不同角度缓解稀疏 reward 与长程信用分配。</li></ul></div>
+  <div class="footer"><span>Agentic RL 中文调研报告</span><span>09 / 30</span></div>
+</section>
+
+
+<section class="slide" id="slide-10">
+  <h2 class="title">Reward 层次一：Outcome / Trajectory Reward</h2>
+  <div class="body"><ul><li>定义：只根据整条轨迹最终结果给奖励，例如成功 +1、失败 0 或 -1。</li>
+<li>优点：客观、简单、易规模化，适合代码测试、数学答案、网页目标状态、游戏胜负等可验证任务。</li>
+<li>缺点：奖励稀疏、高方差、不能定位步骤贡献，也容易导致 benchmark overfitting 或 verifier hacking。</li>
+<li>结论：trajectory-level reward 是 Agentic RL 的起点，但不是终点。</li></ul></div>
+  <div class="footer"><span>Agentic RL 中文调研报告</span><span>10 / 30</span></div>
+</section>
+
+
+<section class="slide" id="slide-11">
+  <h2 class="title">Reward 层次二：Process / Step / Turn Reward</h2>
+  <div class="body"><ul><li>定义：对中间推理、计划、工具调用、搜索 query、memory 操作或每一轮 turn 给局部奖励。</li>
+<li>优点：比 outcome reward 更密集，有助于长任务训练和失败定位。</li>
+<li>风险：可能奖励“看起来合理”的过程，而不是真正有效的行为；也可能诱导冗长 reasoning 或形式主义计划。</li>
+<li>关键要求：过程奖励最好与外部验证、状态变化或可执行检查绑定，而不是只看语言表面。</li></ul></div>
+  <div class="footer"><span>Agentic RL 中文调研报告</span><span>11 / 30</span></div>
+</section>
+
+
+<section class="slide" id="slide-12">
+  <h2 class="title">Verifier-based Reward：目前最可靠的来源之一</h2>
+  <div class="body"><ul><li>Verifier 用外部环境或规则判断结果：单元测试、数学校验、SQL 执行、网页状态、工具返回、游戏环境。</li>
+<li>优点：比纯偏好模型更客观，适合规模化采样与自动评估。</li>
+<li>局限：只适用于可验证任务，且 verifier 可能覆盖不全、被 hack，无法完全解释中间步骤贡献。</li>
+<li>趋势：从只验证最终答案，发展到验证中间状态、局部子目标和工具调用结果。</li></ul></div>
+  <div class="footer"><span>Agentic RL 中文调研报告</span><span>12 / 30</span></div>
+</section>
+
+
+<section class="slide" id="slide-13">
+  <h2 class="title">Critic / Value Model：从“整条轨迹”到“每一步价值”</h2>
+  <div class="body"><ul><li>思路：训练 V(s_t) 或 Q(s_t, a_t) 估计从当前状态或动作继续执行的长期成功概率。</li>
+<li>好处：理论上可以做 step-level credit assignment，降低 policy gradient 方差。</li>
+<li>难点：Agentic state 包含长上下文、工具状态、记忆与隐式计划，critic 很难稳定、准确地建模。</li>
+<li>实践问题：critic 可能 hallucinate value，也可能对未见环境泛化差。</li></ul></div>
+  <div class="footer"><span>Agentic RL 中文调研报告</span><span>13 / 30</span></div>
+</section>
+
+
+<section class="slide" id="slide-14">
+  <h2 class="title">Counterfactual / Leave-one-out：更接近因果归因</h2>
+  <div class="body"><ul><li>核心问题：如果去掉或替换某一步，最终结果是否变化？</li>
+<li>例子：原轨迹成功；去掉某次工具调用后失败，则该工具调用可能是关键贡献步骤。</li>
+<li>优点：比表面 process reward 更接近因果 credit assignment。</li>
+<li>缺点：需要多次 rollout，成本高；开放环境可能不可复现；长轨迹组合爆炸。</li>
+<li>适用：高价值任务、离线分析、诊断 reward model、训练 critic 的辅助信号。</li></ul></div>
+  <div class="footer"><span>Agentic RL 中文调研报告</span><span>14 / 30</span></div>
+</section>
+
+
+<section class="slide" id="slide-15">
+  <h2 class="title">Hierarchical Reward：把长期任务拆成子目标</h2>
+  <div class="body"><ul><li>思路：把长任务拆成 planner-level 子目标和 executor-level 行动，每个子目标有局部 reward。</li>
+<li>优点：降低长程信用分配难度，符合 Agent 的自然结构。</li>
+<li>例子：修复 bug 可拆成定位文件、理解失败测试、修改代码、运行验证、提交 patch。</li>
+<li>难点：子目标如何自动生成？局部 reward 与最终目标是否一致？错误分解会不会误导训练？</li></ul></div>
+  <div class="footer"><span>Agentic RL 中文调研报告</span><span>15 / 30</span></div>
+</section>
+
+
+<section class="slide" id="slide-16">
+  <h2 class="title">Reward 机制小结：没有银弹，但有组合拳</h2>
+  <div class="body"><ul><li>Outcome reward 负责判断“最后是否成功”。</li>
+<li>Process / turn reward 负责提供更密集的训练信号。</li>
+<li>Verifier reward 负责把奖励绑定到外部事实或可执行检查。</li>
+<li>Critic / value model 负责估计中间状态价值。</li>
+<li>Counterfactual 负责更接近因果的归因诊断。</li>
+<li>Hierarchical reward 负责降低长任务跨度，把 credit assignment 分散到子目标层。</li></ul></div>
+  <div class="footer"><span>Agentic RL 中文调研报告</span><span>16 / 30</span></div>
+</section>
+
+
+<section class="slide" id="slide-17">
+  <h2 class="title">主流方法图谱：按 Agent 模块组织</h2>
+  <div class="body"><ul><li>本报告不按算法名堆论文，而按 Agent 模块组织：planning、tool use、memory、reasoning、self-improvement、multi-agent。</li>
+<li>每个模块都问四个问题：action 是什么？reward 怎么给？credit assignment 难在哪里？现有方法如何缓解？</li>
+<li>这种组织方式更贴近 Agentic RL 的本质：训练整个 agent system，而不只是训练 base model。</li></ul></div>
+  <div class="footer"><span>Agentic RL 中文调研报告</span><span>17 / 30</span></div>
+</section>
+
+
+<section class="slide" id="slide-18">
+  <h2 class="title">RL for Planning：从静态计划到自适应重规划</h2>
+  <div class="body"><ul><li>Action：任务分解、子目标选择、计划粒度控制、何时重规划、何时停止。</li>
+<li>Reward：子目标完成率、最终任务成功、计划执行成本、重规划后是否纠错。</li>
+<li>难点：计划看起来合理不等于可执行；错误计划可能在后续被修正，贡献难归因。</li>
+<li>方法方向：ReAct 式 reasoning-action interleaving、tree search + verifier、planner-executor 分层训练、turn-level reward。</li></ul></div>
+  <div class="footer"><span>Agentic RL 中文调研报告</span><span>18 / 30</span></div>
+</section>
+
+
+<section class="slide" id="slide-19">
+  <h2 class="title">RL for Tool Use：学会何时、如何、是否调用工具</h2>
+  <div class="body"><ul><li>Action：选择工具、生成参数、解释工具输出、失败重试、终止工具调用。</li>
+<li>Reward：最终成功、工具结果是否有效、调用成本、参数合法性、是否减少 hallucination。</li>
+<li>难点：工具失败可能是坏操作，也可能提供有价值信息；无效调用和必要探索难区分。</li>
+<li>方法方向：Toolformer 式自监督工具学习、ReAct 式交互轨迹、function-call 统一接口、多工具环境 RL。</li></ul></div>
+  <div class="footer"><span>Agentic RL 中文调研报告</span><span>19 / 30</span></div>
+</section>
+
+
+<section class="slide" id="slide-20">
+  <h2 class="title">RL for Memory：Agentic RL 最有特色的模块之一</h2>
+  <div class="body"><ul><li>Action：写入 memory、检索 memory、压缩 memory、修改 memory、删除 memory、抽象为 skill。</li>
+<li>Reward：当前任务成功、后续任务复用收益、检索命中率、减少 token / tool cost、避免重复错误。</li>
+<li>难点：memory 的收益常常延迟出现；错误 memory 会污染未来轨迹；单条 memory 对最终结果的贡献很难归因。</li>
+<li>方法方向：Reflexion 的 verbal memory、Voyager 的 skill library、episodic / semantic / procedural memory policy learning。</li></ul></div>
+  <div class="footer"><span>Agentic RL 中文调研报告</span><span>20 / 30</span></div>
+</section>
+
+
+<section class="slide" id="slide-21">
+  <h2 class="title">Memory 的 credit assignment 为什么特别难？</h2>
+  <div class="body"><ul><li>一次 memory 写入可能当前任务无用，但未来任务有用；也可能当前看起来有用，长期造成污染。</li>
+<li>检索到的 memory 可能只是辅助，也可能是关键证据；很难从 final reward 直接判断。</li>
+<li>错误 memory 会被反复检索，形成自我强化的错误经验。</li>
+<li>需要同时优化 write policy、retrieval policy、compression policy、deletion policy 与 conflict resolution。</li></ul></div>
+  <div class="footer"><span>Agentic RL 中文调研报告</span><span>21 / 30</span></div>
+</section>
+
+
+<section class="slide" id="slide-22">
+  <h2 class="title">RL for Reasoning：从“会想”到“想得有用”</h2>
+  <div class="body"><ul><li>Action：生成 reasoning trace、选择思考深度、调用 verifier、反思错误、决定何时停止思考并行动。</li>
+<li>Reward：答案正确性、过程正确性、推理成本、是否产生可执行 action。</li>
+<li>难点：长 reasoning 不等于好决策；process reward 可能奖励漂亮话，而不是有效 reasoning。</li>
+<li>方法方向：outcome reward + process reward、verifier-guided reasoning、group comparison、reasoning-aware reward。</li></ul></div>
+  <div class="footer"><span>Agentic RL 中文调研报告</span><span>22 / 30</span></div>
+</section>
+
+
+<section class="slide" id="slide-23">
+  <h2 class="title">RL for Self-improvement：从失败中形成经验</h2>
+  <div class="body"><ul><li>Action：复盘失败、生成反思、更新策略、保存技能、设计下一次尝试。</li>
+<li>Reward：重试成功率、同类任务迁移、减少重复错误、技能复用率。</li>
+<li>代表：Reflexion 使用语言反馈改善后续尝试；Voyager 通过技能库积累可复用能力。</li>
+<li>难点：反思可能 hallucinate；错误经验可能被固化；self-improvement 可能放大 reward hacking。</li></ul></div>
+  <div class="footer"><span>Agentic RL 中文调研报告</span><span>23 / 30</span></div>
+</section>
+
+
+<section class="slide" id="slide-24">
+  <h2 class="title">RL for Multi-Agent：协作中的信用分配更复杂</h2>
+  <div class="body"><ul><li>Action：角色分配、消息通信、任务交接、互评、冲突解决、集体决策。</li>
+<li>Reward：团队成功、个体贡献、通信成本、角色完成度、安全约束。</li>
+<li>难点：共享 reward 下容易 free-riding；难判断哪个 agent 的哪条消息带来成功。</li>
+<li>方法方向：multi-agent credit assignment、turn-level reward、role-level critic、debate / reviewer / planner-worker 结构。</li></ul></div>
+  <div class="footer"><span>Agentic RL 中文调研报告</span><span>24 / 30</span></div>
+</section>
+
+
+<section class="slide" id="slide-25">
+  <h2 class="title">代表性系统：RAGEN / StarPO</h2>
+  <div class="body"><ul><li>RAGEN 研究 multi-turn agent RL 中的 self-evolution，并提出 StarPO 作为 trajectory-level agent RL 框架。</li>
+<li>重要发现：多轮 agent RL 可能出现 Echo Trap、reward variance cliffs 与 gradient spikes。</li>
+<li>RAGEN 指出：如果没有细粒度、reasoning-aware reward signals，agent 可能学到浅层策略或幻觉式 thoughts。</li>
+<li>启示：Agentic RL 不能只依赖最终 reward，需要稳定训练机制、轨迹过滤、critic 和更细粒度反馈。</li></ul></div>
+  <div class="footer"><span>Agentic RL 中文调研报告</span><span>25 / 30</span></div>
+</section>
+
+
+<section class="slide" id="slide-26">
+  <h2 class="title">代表性系统：AgentGym-RL</h2>
+  <div class="body"><ul><li>AgentGym-RL 面向 long-horizon multi-turn decision making，强调统一、交互式、多环境 RL 框架。</li>
+<li>系统包括 environment、agent、training module，支持多场景、多算法和多轮交互。</li>
+<li>价值：把 Agentic RL 从单一任务实验推进到可复用训练基础设施。</li>
+<li>局限：框架解决基础设施问题，但 reward 设计、credit assignment 与跨环境泛化仍是核心挑战。</li></ul></div>
+  <div class="footer"><span>Agentic RL 中文调研报告</span><span>26 / 30</span></div>
+</section>
+
+
+<section class="slide" id="slide-27">
+  <h2 class="title">代表性系统：AgentRL</h2>
+  <div class="body"><ul><li>AgentRL 面向 scalable multi-turn, multi-task agentic RL training。</li>
+<li>系统侧：异步 generation-training pipeline、统一 function-call API、容器化环境与 centralized controller。</li>
+<li>算法侧：cross-policy sampling 促进多轮探索，task advantage normalization 稳定多任务训练。</li>
+<li>启示：Agentic RL 的瓶颈不只是算法，也包括环境接口、采样效率、异步训练和多任务稳定性。</li></ul></div>
+  <div class="footer"><span>Agentic RL 中文调研报告</span><span>27 / 30</span></div>
+</section>
+
+
+<section class="slide" id="slide-28">
+  <h2 class="title">当前方法的共同局限</h2>
+  <div class="body"><ul><li>Reward 仍偏稀疏：很多任务只能验证最终结果，过程监督不足。</li>
+<li>Credit assignment 没有通用解：critic、process reward、counterfactual 都有成本或可靠性问题。</li>
+<li>泛化不足：在特定环境 / benchmark 学到的策略未必迁移到真实任务。</li>
+<li>成本高：多轮 rollout、工具调用、环境执行、反事实采样都很贵。</li>
+<li>安全风险更高：agent 可以调用工具和改变环境，reward hacking 的后果比普通文本生成严重。</li></ul></div>
+  <div class="footer"><span>Agentic RL 中文调研报告</span><span>28 / 30</span></div>
+</section>
+
+
+<section class="slide" id="slide-29">
+  <h2 class="title">未来方向：以 Reward 和 Credit Assignment 为中心</h2>
+  <div class="body"><ul><li>Verifier-grounded process reward：把过程监督绑定到可执行检查，而不是语言表面。</li>
+<li>Memory policy learning：系统学习 memory 的写、读、压缩、删除和冲突解决。</li>
+<li>Hierarchical agent training：联合训练 planner、executor、tool router、memory manager。</li>
+<li>Counterfactual and causal credit assignment：用反事实 rollout、hindsight analysis 和 privileged critic 做更细粒度归因。</li>
+<li>Safe agentic RL：把权限、成本、安全约束和审计轨迹纳入 reward 与训练环境。</li></ul></div>
+  <div class="footer"><span>Agentic RL 中文调研报告</span><span>29 / 30</span></div>
+</section>
+
+
+<section class="slide" id="slide-30">
+  <h2 class="title">总结：Agentic RL 的核心命题</h2>
+  <div class="body"><ul><li>Agentic RL 的研究对象是长期交互轨迹，而不是单轮回答。</li>
+<li>传统 RL 和 LLM RL 的方法可以迁移，但必须重构 state、action、reward 与 evaluation。</li>
+<li>Reward 机制是当前最重要的瓶颈：trajectory-level success 不足以提供 action-level learning signal。</li>
+<li>主流方法正在围绕 planning、tool use、memory、reasoning、self-improvement 和 multi-agent 协作展开。</li>
+<li>未来最关键的突破很可能来自可验证过程奖励、因果信用分配、模块化 agent 训练和安全约束下的在线学习。</li></ul></div>
+  <div class="footer"><span>Agentic RL 中文调研报告</span><span>30 / 30</span></div>
+</section>
+</main>
+</body>
+</html>
